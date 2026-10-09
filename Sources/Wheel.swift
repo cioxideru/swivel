@@ -10,6 +10,10 @@ final class Wheel {
     var smooth = false {
         didSet { if !smooth { glide.stop() } }
     }
+    var tuning: GlideTuning {
+        get { glide.tuning }
+        set { glide.tuning = newValue }
+    }
 
     private let glide = Glide()
     private lazy var tap = EventTap(types: [.scrollWheel], listenOnly: false) { [unowned self] type, event in
@@ -63,19 +67,27 @@ final class Wheel {
     }
 }
 
+/// The parts of the glide a user can adjust.
+struct GlideTuning {
+    var speed = 90.0         // points per notch
+    var acceleration = 4.0   // largest boost for a fast-spinning wheel, 1 turns it off
+    var glideTime = 0.47     // s until the screen settles after the last notch
+
+    /// A critically damped spring is within 1% of its target after about 6.64 / rate seconds.
+    var spring: Double { 6.64 / glideTime }
+}
+
 /// Turns wheel notches into a steady glide, one scroll event per display frame.
 ///
-/// Each notch adds `notch` points of travel (more when the wheel spins fast).
+/// Each notch adds `tuning.speed` points of travel (more when the wheel spins fast).
 /// That travel is released evenly over a little more than the time the next
 /// notch is expected, learned from the wheel's rhythm, so evenly paced notches
 /// give an even speed instead of a jolt per notch. The screen then follows the
 /// released target on a critically damped spring: no velocity jumps and no
 /// overshoot, also when the pace changes or the wheel stops.
 final class Glide: NSObject {
-    private let notch = 90.0                // points per notch
+    var tuning = GlideTuning()
     private let boostRate = 12.0            // notches per second before travel grows
-    private let maxBoost = 4.0
-    private let spring = 14.0               // 1/s, higher follows the wheel more tightly
     private let slack = 1.25                // release slower than the rhythm so slowing down never runs dry
     private let firstInterval = 0.12        // s, before a rhythm is known
     private let minInterval = 0.008         // s
@@ -121,8 +133,8 @@ final class Glide: NSObject {
                 axis.interval = 0
             }
             let interval = axis.interval == 0 ? firstInterval : axis.interval
-            let boost = min(max(1 / (interval * boostRate), 1), maxBoost)
-            axis.owed += direction * notch * boost
+            let boost = min(max(1 / (interval * boostRate), 1), tuning.acceleration)
+            axis.owed += direction * tuning.speed * boost
             axis.releaseSpeed = abs(axis.owed) / (interval * slack)
             axes[index] = axis
             log.debug("notch axis=\(index) gap=\(Int(gap * 1000))ms interval=\(Int(interval * 1000))ms boost=\(boost)")
@@ -151,6 +163,7 @@ final class Glide: NSObject {
     @objc private func frame(_ link: CADisplayLink) {
         let seconds = min(max(link.targetTimestamp - lastFrame, 0), 0.05)
         lastFrame = link.targetTimestamp
+        let spring = tuning.spring
         let decay = exp(-spring * seconds)
         var steps = [0.0, 0.0]
         var whole: [Int32] = [0, 0]

@@ -46,7 +46,7 @@ SIGN_IDENTITY="Apple Development: you@example.com (TEAMID)" ./build.sh
 
 ## How the smooth scrolling works
 
-Each wheel notch adds a fixed amount of travel, more when the wheel spins fast. Swivel learns the rhythm of your notches and releases that travel evenly over the time it expects until the next notch, so a steady hand gives a steady speed instead of a jolt per notch. The screen follows the released travel on a critically damped spring, which changes speed smoothly and never overshoots. One scroll event is sent per display refresh, and sub-pixel fractions are carried over instead of being lost. The tuning constants sit at the top of `Glide` in `Sources/Wheel.swift`.
+Each wheel notch adds a fixed amount of travel, more when the wheel spins fast. Swivel learns the rhythm of your notches and releases that travel evenly over the time it expects until the next notch, so a steady hand gives a steady speed instead of a jolt per notch. The screen follows the released travel on a critically damped spring, which changes speed smoothly and never overshoots. One scroll event is sent per display refresh, and sub-pixel fractions are carried over instead of being lost. **Smooth Scrolling Settings…** in the menu adjusts the feel with three sliders that apply while you scroll: **Speed** (how far one notch goes), **Acceleration** (extra distance when the wheel spins fast) and **Glide** (how long the page keeps moving after the wheel stops).
 
 ## License
 

@@ -14,9 +14,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private let menu = NSMenu()
     private var statusItem: NSStatusItem!
     private var retryTimer: Timer?
+    private lazy var scrollSettings = ScrollSettings { [weak self] in self?.wheel.tuning = $0 }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         defaults.register(defaults: [Key.layout: true])
+        wheel.tuning = scrollSettings.tuning
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         let icon = NSImage(named: "StatusIcon")
             ?? NSImage(systemSymbolName: "arrow.triangle.2.circlepath", accessibilityDescription: "Swivel")
@@ -72,6 +74,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(toggle("Switch Layout with ⌘⇧", Key.layout))
         menu.addItem(toggle("Smooth Scrolling", Key.smooth))
         menu.addItem(toggle("Reverse Mouse Wheel", Key.reverse))
+        menu.addItem(action("Smooth Scrolling Settings…", #selector(showScrollSettings)))
 
         let needed = (defaults.bool(forKey: Key.layout) ? [Permission.inputMonitoring] : [])
             + (wheel.isNeeded ? [Permission.accessibility] : [])
@@ -147,6 +150,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         default:
             break
         }
+    }
+
+    @objc private func showScrollSettings() {
+        scrollSettings.show()
     }
 
     @objc private func showAbout() {
