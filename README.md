@@ -17,6 +17,7 @@
 
 ## Contents
 
+- [Why Swivel exists](#why-swivel-exists)
 - [What Swivel does](#what-swivel-does)
 - [Quick start](#quick-start)
 - [Installation](#installation)
@@ -33,6 +34,37 @@
 - [Notes for AI agents and contributors](#notes-for-ai-agents-and-contributors)
 - [FAQ](#faq)
 - [License](#license)
+
+## Why Swivel exists
+
+Swivel was made for one everyday setup: a Mac, two (or more) keyboard languages, and an ordinary mouse with a clicky wheel. Out of the box, macOS handles all three of those a little awkwardly, and fixing them used to take several separate, often paid or heavyweight utilities. Swivel fixes exactly these three annoyances in one small, free app and does nothing else.
+
+### Pain 1: switching keyboard layouts is clumsy
+
+If you write in two languages, say English and Russian, you switch layouts dozens or hundreds of times a day. macOS offers Control + Space or the Globe key. Control + Space collides with shortcuts in IDEs, terminals and design tools; the Globe key is missing on many external keyboards; and people coming from Windows or Linux have years of muscle memory for a Shift-based combination.
+
+**What Swivel does about it:** a quick tap of Command + Shift switches the layout. Because the switch happens only when both keys are released *and nothing else was pressed*, it never interferes with the many ⌘⇧ shortcuts (⌘⇧T, ⌘⇧4, ⌘⇧Z and so on). You get a fast, one-handed toggle that stays out of the way.
+
+### Pain 2: a normal mouse wheel scrolls in jerks
+
+Trackpads and the Magic Mouse scroll smoothly. Almost every other mouse, especially gaming and office mice with a notched ("clicky") wheel, does not: each notch makes the page jump a few lines. Reading long pages, code or documents becomes tiring, because the eye loses its place at every jump. macOS has no setting to change this.
+
+Simple smoothing tools help when you spin the wheel quickly, but when you scroll slowly, which is how most people read, the page visibly surges and brakes with every notch.
+
+**What Swivel does about it:** it turns each notch into a short glide and, crucially, learns the rhythm of your wheel so that slow, steady scrolling becomes slow, steady movement, not a series of pulses. Three sliders let you set how far a notch goes, how much fast spinning speeds things up, and how long the glide lasts.
+
+### Pain 3: one scroll direction for two very different devices
+
+macOS has a single "natural scrolling" switch for both the trackpad and the mouse. Many people want natural scrolling on the trackpad (content follows the fingers) but the traditional direction on a mouse wheel, or the other way round. With one switch, one of the two always feels backwards.
+
+**What Swivel does about it:** it can reverse only the mouse wheel. The trackpad keeps the system setting.
+
+### Who it is for
+
+- People who type in more than one language every day and want a quick, conflict-free layout toggle.
+- Anyone using a non-Apple mouse on a Mac: gamers, developers, designers, office users, people with a desktop Mac and an external mouse.
+- People who move between a MacBook trackpad and a desk mouse and want each to scroll the way it feels right.
+- Anyone who prefers a tiny, transparent, dependency-free tool over a large utility suite: about 700 lines of Swift, no network access, no telemetry, public domain.
 
 ## What Swivel does
 
