@@ -31,7 +31,7 @@ enum Permission {
 
     /// Command that clears a stale entry left behind by an older build.
     var resetCommand: String {
-        let service = self == .inputMonitoring ? "ListenEvent" : "Accessibility"
+        let service = self == .inputMonitoring ? "ListenEvent" : "PostEvent"
         return "tccutil reset \(service) \(Bundle.main.bundleIdentifier ?? "io.github.cioxideru.swivel")"
     }
 }

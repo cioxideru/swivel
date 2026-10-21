@@ -21,7 +21,9 @@ final class LayoutSwitcher {
     var isRunning: Bool { tap.isRunning }
 
     @discardableResult
-    func start() -> Bool { tap.start() }
+    /// A listen-only tap is created even without Input Monitoring (it then receives
+    /// nothing), so the permission is also asked for directly.
+    func start() -> Bool { CGPreflightListenEventAccess() && tap.start() }
 
     func stop() {
         tap.stop()

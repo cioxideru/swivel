@@ -93,6 +93,14 @@ final class Glide: NSObject {
     private let minInterval = 0.008         // s
     private let maxInterval = 0.4           // s, a longer pause starts a new gesture
     private let intervalBlend = 0.5
+    private let pointsPerLine = 10.0        // macOS's own pixel-to-line ratio
+    // Terminals turn every point into text lines, so a notch there scrolls a third as far.
+    // ponytail: follows the frontmost app, not the window under the pointer.
+    private let terminalScale = 1.0 / 3
+    private let terminals: Set<String> = [
+        "com.apple.Terminal", "com.googlecode.iterm2", "com.mitchellh.ghostty",
+        "net.kovidgoyal.kitty", "org.alacritty", "com.github.wez.wezterm",
+    ]
 
     private struct Axis {
         var direction = 0.0
@@ -104,6 +112,7 @@ final class Glide: NSObject {
         var position = 0.0
         var velocity = 0.0
         var carry = 0.0         // fraction of a whole point not yet posted
+        var lineCarry = 0.0     // fraction of a whole line not yet posted
     }
 
     private var axes = [Axis(), Axis()]
@@ -115,6 +124,8 @@ final class Glide: NSObject {
     func add(_ event: CGEvent) {
         let now = CACurrentMediaTime()
         flags = event.flags
+        let app = NSWorkspace.shared.frontmostApplication?.bundleIdentifier ?? ""
+        let scale = terminals.contains(app) ? terminalScale : 1
         let deltas = [event.getDoubleValueField(.scrollWheelEventPointDeltaAxis1),
                       event.getDoubleValueField(.scrollWheelEventPointDeltaAxis2)]
         for index in axes.indices where deltas[index] != 0 {
@@ -134,7 +145,7 @@ final class Glide: NSObject {
             }
             let interval = axis.interval == 0 ? firstInterval : axis.interval
             let boost = min(max(1 / (interval * boostRate), 1), tuning.acceleration)
-            axis.owed += direction * tuning.speed * boost
+            axis.owed += direction * tuning.speed * boost * scale
             axis.releaseSpeed = abs(axis.owed) / (interval * slack)
             axes[index] = axis
             log.debug("notch axis=\(index) gap=\(Int(gap * 1000))ms interval=\(Int(interval * 1000))ms boost=\(boost)")
@@ -172,6 +183,7 @@ final class Glide: NSObject {
         let decay = exp(-spring * seconds)
         var steps = [0.0, 0.0]
         var whole: [Int32] = [0, 0]
+        var lines: [Int64] = [0, 0]
         var moving = false
         for index in axes.indices {
             var axis = axes[index]
@@ -190,6 +202,9 @@ final class Glide: NSObject {
             axis.carry += steps[index]
             whole[index] = Int32(axis.carry.rounded(.towardZero))
             axis.carry -= Double(whole[index])
+            axis.lineCarry += steps[index] / pointsPerLine
+            lines[index] = Int64(axis.lineCarry.rounded(.towardZero))
+            axis.lineCarry -= Double(lines[index])
             moving = moving || axis.owed != 0 || abs(next) >= 0.5 || abs(axis.velocity) >= 10
             axes[index] = axis
         }
@@ -198,6 +213,13 @@ final class Glide: NSObject {
            let event = CGEvent(scrollWheelEvent2Source: nil, units: .pixel, wheelCount: 2,
                                wheel1: whole[0], wheel2: whole[1], wheel3: 0) {
             event.setIntegerValueField(.scrollWheelEventIsContinuous, value: 1)
+            // macOS rounds any nonzero step up to a whole line, so apps that scroll by
+            // lines (terminals) would move a line every frame. Post the real count;
+            // writing it recomputes the point deltas, so they are restored after.
+            event.setIntegerValueField(.scrollWheelEventDeltaAxis1, value: lines[0])
+            event.setIntegerValueField(.scrollWheelEventDeltaAxis2, value: lines[1])
+            event.setIntegerValueField(.scrollWheelEventPointDeltaAxis1, value: Int64(whole[0]))
+            event.setIntegerValueField(.scrollWheelEventPointDeltaAxis2, value: Int64(whole[1]))
             // The fixed-point field counts in tenths of a point (an 8 pt event carries 0.8).
             // Writing the exact step there keeps the fraction for apps that read it.
             event.setDoubleValueField(.scrollWheelEventFixedPtDeltaAxis1, value: steps[0] / 10)

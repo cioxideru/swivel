@@ -177,7 +177,7 @@ How Swivel handles permissions:
 3. While something is missing, Swivel retries every 1.5 seconds, so a permission granted in System Settings takes effect within a couple of seconds, without restarting the app.
 4. Clicking **Allow…** again opens a short explanation with **Open System Settings** and **Copy Command** buttons.
 
-Swivel checks a permission by actually creating its event tap, because that is the only reliable signal: the system's "is it granted?" calls can disagree with what really works.
+Swivel checks a permission by actually creating its event tap, because the system's "is it granted?" calls can disagree with what really works. The one exception: a listen-only tap is created even without Input Monitoring (it then simply receives nothing), so for layout switching Swivel also requires `CGPreflightListenEventAccess()` to agree.
 
 ### "System Settings says allowed, but Swivel still asks"
 
@@ -188,7 +188,7 @@ The entry in System Settings belongs to an older copy of the app with a differen
 
   ```sh
   tccutil reset ListenEvent io.github.cioxideru.swivel     # Input Monitoring
-  tccutil reset Accessibility io.github.cioxideru.swivel   # Accessibility
+  tccutil reset PostEvent io.github.cioxideru.swivel     # Accessibility
   ```
 
 The **Copy Command** button in Swivel copies the right line for you.
@@ -304,6 +304,8 @@ They live at the top of `Glide`:
 | `minInterval` | 0.008 s | Lower bound for a measured gap. |
 | `maxInterval` | 0.4 s | A longer pause starts a new gesture. |
 | `intervalBlend` | 0.5 | Weight of the newest gap in the interval estimate. |
+| `pointsPerLine` | 10 pt | Points per line in the line delta, which terminals read. |
+| `terminalScale` | 1/3 | A notch scrolls a third as far while a terminal (Terminal, iTerm2, Ghostty, kitty, Alacritty, WezTerm) is the frontmost app. |
 
 ## Project layout
 
@@ -409,7 +411,7 @@ A line like `Failed to match existing code requirement` means the stored permiss
 osascript -e 'quit app "Swivel"'
 rm -rf /Applications/Swivel.app
 tccutil reset ListenEvent io.github.cioxideru.swivel
-tccutil reset Accessibility io.github.cioxideru.swivel
+tccutil reset PostEvent io.github.cioxideru.swivel
 rm -rf ~/Library/Containers/io.github.cioxideru.swivel
 ```
 
