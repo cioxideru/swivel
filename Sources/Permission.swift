@@ -15,13 +15,6 @@ enum Permission {
         }
     }
 
-    var isGranted: Bool {
-        switch self {
-        case .inputMonitoring: CGPreflightListenEventAccess()
-        case .accessibility: CGPreflightPostEventAccess()
-        }
-    }
-
     /// Shows the system prompt the first time; later calls do nothing visible.
     func request() {
         switch self {

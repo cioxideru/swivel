@@ -42,9 +42,11 @@ final class ScrollSettings: NSObject {
     }
 
     func show() {
-        if window == nil { window = makeWindow() }
+        if window == nil {
+            window = makeWindow()
+            window?.center()
+        }
         NSApp.activate(ignoringOtherApps: true)
-        window?.center()
         window?.makeKeyAndOrderFront(nil)
     }
 

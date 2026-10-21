@@ -11,7 +11,7 @@ final class LayoutSwitcher {
     private enum Gesture { case idle, armed, cancelled }
     private var gesture = Gesture.idle
     private lazy var tap = EventTap(
-        types: [.flagsChanged, .keyDown, .leftMouseDown, .rightMouseDown, .otherMouseDown],
+        types: [.flagsChanged, .keyDown, .leftMouseDown, .rightMouseDown, .otherMouseDown, .scrollWheel],
         listenOnly: true
     ) { [unowned self] type, event in
         self.observe(type, event)
@@ -31,7 +31,7 @@ final class LayoutSwitcher {
     private func observe(_ type: CGEventType, _ event: CGEvent) {
         let held = type == .flagsChanged ? event.flags.intersection(Self.modifiers) : []
         if type != .flagsChanged {
-            // A key or click while modifiers are down makes it a shortcut.
+            // A key, click or scroll while modifiers are down makes it a shortcut.
             if gesture == .armed { gesture = .cancelled }
         } else if held.isEmpty {
             if gesture == .armed { Self.selectNextInputSource() }

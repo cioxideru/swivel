@@ -159,7 +159,7 @@ The menu-bar icon is drawn dimmed while an enabled feature is waiting for a perm
 ### Layout switching rules
 
 - Press Command and Shift (in any order), then release both. The next enabled keyboard input source is selected, wrapping around at the end of the list.
-- Pressing any other key, clicking a mouse button, or adding Control, Option or Fn while Command + Shift are held cancels the switch until all modifiers are released.
+- Pressing any other key, clicking a mouse button, scrolling, or adding Control, Option or Fn while Command + Shift are held cancels the switch until all modifiers are released.
 - The switch happens on release, so ⌘⇧-shortcuts never trigger it.
 - The cycle follows the order of **System Settings → Keyboard → Text Input → Input Sources**.
 
@@ -167,7 +167,7 @@ The menu-bar icon is drawn dimmed while an enabled feature is waiting for a perm
 
 | Permission | Needed for | Why | What Swivel can do with it |
 |---|---|---|---|
-| **Input Monitoring** | Layout switching | To see a lone Command + Shift press. | A *listen-only* event tap receives modifier changes, key-down events and mouse-button presses. It cannot change or block them, and it records nothing. Key codes are never read. |
+| **Input Monitoring** | Layout switching | To see a lone Command + Shift press. | A *listen-only* event tap receives modifier changes, key-down events, mouse-button presses and scroll events. It cannot change or block them, and it records nothing. Key codes are never read. |
 | **Accessibility** | Smooth scrolling, wheel reversal | macOS allows changing input events only with this permission. | A separate event tap receives **scroll-wheel events only**. It flips their sign (reversal) or replaces them with smooth scroll events. It never sees keyboard events. |
 
 How Swivel handles permissions:
@@ -242,7 +242,7 @@ A small state machine with three states: `idle`, `armed` and `cancelled`.
 
 - Modifiers change to exactly Command + Shift while `idle` → `armed`.
 - Control, Option or Fn joins → `cancelled`.
-- A key-down or mouse-button press while `armed` → `cancelled`.
+- A key-down, mouse-button press or scroll while `armed` → `cancelled`.
 - All modifiers released → if `armed`, select the next input source; then `idle`.
 
 The next source comes from `TISCreateInputSourceList` filtered to enabled, selectable keyboard input sources; the current source is found with `TISCopyCurrentKeyboardInputSource`, and `TISSelectInputSource` selects the one after it.

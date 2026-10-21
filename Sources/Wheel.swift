@@ -139,6 +139,11 @@ final class Glide: NSObject {
             axes[index] = axis
             log.debug("notch axis=\(index) gap=\(Int(gap * 1000))ms interval=\(Int(interval * 1000))ms boost=\(boost)")
         }
+        // A link whose screen went away (unplugged, asleep) stops firing; replace it.
+        if let link, now - lastFrame > 0.25 {
+            link.invalidate()
+            self.link = nil
+        }
         if link == nil { startLink(now) }
     }
 
